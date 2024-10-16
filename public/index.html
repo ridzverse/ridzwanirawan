@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chatbot - Ridzwan Irawan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500&display=swap" rel="stylesheet"> <!-- Menggunakan Figtree -->
   <style>
     body {
       margin: 0;
@@ -13,7 +14,7 @@
       align-items: center;
       height: 100vh;
       background-color: #0d0d0d;
-      font-family: 'Arial', sans-serif;
+      font-family: 'Figtree', sans-serif; /* Menggunakan Figtree */
       color: white;
     }
 
@@ -37,14 +38,30 @@
       border-radius: 50%;
       object-fit: cover;
       margin-bottom: 10px;
-      border: 2px solid #ffffff;
+      border: 2px solid #640ae5;
+    }
+
+    #profile .name {
+      font-weight: 500; /* Menggunakan bobot font yang lebih tebal */
+      font-size: 18px;
+      margin: 5px 0;
+    }
+
+    .rating {
+      color: gold; /* Warna bintang */
+    }
+
+    .rating-value {
+      color: #ccc; /* Warna abu-abu untuk rating */
+      font-weight: 400; /* Mengatur bobot font */
     }
 
     #profile .bio {
       font-size: 14px;
       line-height: 1.6;
       margin: 0 10px;
-      font-weight: bold;
+      font-weight: 400;
+      color: #640ae5; /* Warna abu-abu untuk bio */
     }
 
     #chat-history {
@@ -53,6 +70,18 @@
       overflow-y: auto;
       padding: 10px;
       margin: 10px 0;
+      scrollbar-width: thin; /* Untuk Firefox */
+      scrollbar-color: rgba(255, 255, 255, 0.5) transparent; /* Warna scrollbar untuk Firefox */
+    }
+
+    #chat-history::-webkit-scrollbar {
+      width: 8px; /* Lebar scrollbar */
+      background: transparent; /* Latar belakang scrollbar */
+    }
+
+    #chat-history::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.5); /* Warna scrollbar */
+      border-radius: 10px; /* Membulatkan tepi scrollbar */
     }
 
     .message {
@@ -64,13 +93,13 @@
     }
 
     .user-message {
-      background-color: rgba(70, 70, 70, 0.9);
+      background-color: #1a1a1a;
       margin-left: auto;
       text-align: right;
     }
 
     .bot-message {
-      background-color: rgba(50, 50, 50, 0.9);
+      background-color: #1a1a1a;
       margin-right: auto;
       text-align: left;
     }
@@ -107,8 +136,17 @@
     }
 
     button img {
-      width: 30px;
-      height: 30px;
+      width: 40px;
+      height: 40px;
+    }
+
+    a {
+      color: #640ae5; /* Warna untuk tautan */
+      text-decoration: none; /* Menghilangkan garis bawah pada tautan */
+    }
+
+    a:hover {
+      text-decoration: underline; /* Menambahkan garis bawah saat hover */
     }
   </style>
 </head>
@@ -116,11 +154,14 @@
   <div id="chat-container">
     <div id="profile">
       <img src="pp.png" alt="Profile Picture">
+      <div class="name">Ridzwan Irawan</div>
+      <div class="rating">
+        ★★★★★ <span class="rating-value">5.0</span>
+      </div>
       <p class="bio">
         Welcome! I'm Ridzwan Irawan, a graphic designer specializing in digital portrait vector art. 
-        Since 2021, I’ve had the privilege of working with over 400 amazing clients and earning 300+ 
-        positive reviews on Fiverr. Now, you can chat directly with my AI assistant to explore ideas, 
-        ask questions, or discuss your next custom artwork. If you're interested in collaborating or 
+        Now, you can chat directly with my AI assistant to explore ideas and ask questions. 
+        If you're interested in collaborating or 
         have a special project in mind, feel free to reach out—let’s bring your vision to life together!
       </p>
     </div>
@@ -146,17 +187,22 @@
     }
 
     function formatResponse(text) {
-      text = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');  // Bold
-      text = text.replace(/\[(.*?)\]\((https?:\/\/.*?)\)/g, '<a href="$2" target="_blank" style="color: #1e90ff;">$1</a>');  // Link
-      text = text.replace(/^- (.*)/gm, '<br>• $1');  // List
-      text = text.replace(/\n/g, '<br>');  // Line breaks
-      return text;
+      // Mengganti **text** dengan <strong>text</strong>
+      let boldText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+      // Mengganti URL dengan <a> tag
+      boldText = boldText.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+
+      // Memisahkan item berdasarkan garis baru
+      const formattedList = boldText.split('\n').map(item => item.trim()).filter(item => item).join('<br>');
+
+      return formattedList; // Kembalikan hasil yang sudah diformat
     }
 
     function addMessage(text, isUser = true) {
       const message = document.createElement('div');
       message.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
-      message.innerHTML = `${text} <span style="display: block; font-size: 12px; text-align: right;">${getTimeStamp()}</span>`;
+      message.innerHTML = `${formatResponse(text)} <span style="display: block; font-size: 12px; text-align: right;">${getTimeStamp()}</span>`;
       chatHistory.appendChild(message);
       chatHistory.scrollTop = chatHistory.scrollHeight;
     }
@@ -172,8 +218,7 @@
         });
 
         const data = await response.json();
-        const formattedResponse = formatResponse(data.response);
-        addMessage(formattedResponse, false);
+        addMessage(data.response, false);
       } catch (error) {
         console.error('Error:', error);
         addMessage('Error: Unable to reach the server.', false);
